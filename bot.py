@@ -1,3 +1,5 @@
+import os
+
 from discord.ext import commands
 from logging import getLogger, INFO, StreamHandler, Formatter
 
