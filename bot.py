@@ -5,7 +5,7 @@ from kiite import Kiite
 from help import Help
 
 # Global variables
-TOKEN = 'NzE4NDg0NDEyMTY5MzIyNTc5.Xtpizw.wVWUQG9OLweuwsuggB7yNnlVJDI'
+token = os.environ['DISCORD_BOT_TOKEN']
 logger = getLogger('kiite')
 logger.setLevel(INFO)
 handler = StreamHandler()
@@ -24,5 +24,9 @@ async def on_ready():
     logger.info("ID: " + str(bot.user.id))
     logger.info('------')
 
-bot.add_cog(Kiite(bot))
-bot.run(TOKEN)
+
+if __name__ == "__main__":
+    bot.load_extension("kiite")
+    # bot.add_cog(Kiite(bot))
+
+    bot.run(token)

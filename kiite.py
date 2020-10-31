@@ -164,3 +164,7 @@ class Kiite(commands.Cog, name="kiite"):
             s += race.overview() + "\n"
 
         logger.info("clean up races, rests: \n " + s)
+
+
+def setup(bot):
+    return bot.add_cog(Kiite(bot))
