@@ -1,1 +1,1 @@
-kiite: python kiite.py
+kiite: python bot.py
