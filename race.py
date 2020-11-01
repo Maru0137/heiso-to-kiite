@@ -2,6 +2,7 @@ from enum import Enum, auto
 import logging
 import re
 import uuid
+from hashids import Hashids
 
 
 class Site(Enum):
@@ -21,8 +22,9 @@ class Site(Enum):
 
 
 class Runner:
-    def __init__(self, name, url):
+    def __init__(self, name, id, url):
         self.name = name
+        self.id = id
         self.url = url
 
     def __str__(self):
@@ -36,48 +38,48 @@ class Runner:
             return re.search("co[0-9]+", self.url).group()
         return None
 
-    def template(self, niconico=False):
-        niconico_url = self.site() is Site.NICONICO
-
-        url = self.niconico_community_id() if niconico and niconico_url else self.url
-        return "{name}さん {url}".format(name=self.name, url=url)
+    def template(self):
+        return "{name}さん {url}".format(name=self.name, url=self.url)
 
 
 class Race:
     hash_len = 8
 
-    def __init__(self, timestamp):
-        self.uuid = uuid.uuid4()
-        self.timestamp = timestamp
+    def __init__(self, id, channel_id, start_time=None):
+        self.id = id
+        self.channel_id = channel_id
+        self.start_time = start_time
         self.runner = {}
         self.mirror = {}
+        self.note = None
 
-    def entry(self, name, url):
-        self.runner[name] = Runner(name, url)
+    def entry(self, name, id, url):
+        self.runner[name] = Runner(name, id, url)
 
-    def entry_mirror(self, name, url):
-        self.runner[name] = Runner(name, url)
+    def entry_mirror(self, name, id, url):
+        self.runner[name] = Runner(name, id, url)
 
     def retire(self, name):
         del self.runner[name]
 
     def hash(self):
-        return "#" + str(self.uuid)[:Race.hash_len]
+        hi = Hashids(min_length=6)
+        return hi.encode(self.id)
 
     def match_hash(self, hash):
         return hash == self.hash()
 
-    def timestamp_str(self):
-        return self.timestamp.strftime("%Y/%m/%d %H:%M")
+    def start_time_str(self):
+        return self.start_time.strftime("%Y/%m/%d %H:%M")
 
     def overview(self):
-        return "{}: {}".format(self.hash(), self.timestamp_str())
+        return "{}: {}".format(self.hash(), self.start_time_str())
 
-    def template(self, niconico=False):
-        nl = "<br >\n" if niconico else "\n"
+    def template(self, html_mode=False):
+        nl = "<br >\n" if html_mode else "\n"
 
         s = self.hash() + nl
-        s += self.timestamp_str() + "~" + nl
+        s += self.start_time_str() + "~" + nl
 
         sorted_runner = sorted(self.runner.items())
         s += "【走者一覧】{}".format(nl)
@@ -88,6 +90,6 @@ class Race:
             sorted_mirror = sorted(self.mirror.items())
             s += "【ミラー】" + nl
             for _, mirror in sorted_mirror:
-                s += mirror.template(niconico) + nl
+                s += mirror.template() + nl
 
         return s

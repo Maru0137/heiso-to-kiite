@@ -50,7 +50,7 @@ class Kiite(commands.Cog, name="kiite"):
             .format(timestr))
 
     @commands.command(description="Open a race")
-    async def open(self, ctx, timestr):
+    async def open(self, ctx, start_time_str):
         """ 
         usage: !kiite open TIMESTRING
 
@@ -58,8 +58,8 @@ class Kiite(commands.Cog, name="kiite"):
                         The string must be following the format "hh:mm" or "yyyy/mm/dd hh:mm".
         """
 
-        timestamp = self.__parse_timestamp(timestr)
-        race = Race(timestamp)
+        start_time = self.__parse_timestamp(start_time_str)
+        race = Race(ctx.message.id, ctx.channel.id, start_time)
         self.races[race.hash()] = race
         await ctx.channel.send(race.template())
 
